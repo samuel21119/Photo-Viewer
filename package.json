@@ -1,6 +1,6 @@
 {
   "name": "PhotoViewer",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "file-regex": "^3.0.1",
     "fs": "0.0.1-security",
     "math": "0.0.3",
+    "open": "^6.4.0",
     "path": "^0.12.7"
   }
 }

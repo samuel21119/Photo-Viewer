@@ -5,9 +5,14 @@ const {
     Menu,
     MenuItem
 } = require('electron');
+const fs = require('fs');
 const url = require('url');
 const path = require('path');
+const open = require('open');
+const request = require('request');
+const pkg = require('./package.json');
 const ipc = require('electron').ipcMain
+UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0';
 
 
 app.on('ready', function() {
@@ -52,12 +57,14 @@ function createWindow() {
     win.on('closed', () => {
         win = null;
     });
+
+    CheckUpdate();
 }
 function setMainMenu() {
 
     const isMac = process.platform === 'darwin'
 
-const template = [
+    const template = [
     ...(isMac ? [{
         label: app.name,
         submenu: [
@@ -174,9 +181,6 @@ const template = [
     ]
 
 
-
-
-
     const menu = Menu.getApplicationMenu();
     const submenu = new Menu();
     submenu.append(new MenuItem({
@@ -193,6 +197,50 @@ const template = [
 ipc.on('open-file-dialog', function (event) {
     open_file_dialog();
 })
+function CheckUpdate() {
+    request({
+        url: 'https://api.github.com/repos/samuel21119/Photo-Viewer/releases/latest',
+        headers: {'User-Agent': UserAgent}}, function(err, resp, body) {
+        if (err || resp.statusCode !== 200)
+            return;
+        body = JSON.parse(body);
+        current_version = pkg.version;
+        latest_version = body.name;
+        console.log(latest_version , current_version);
+        if (current_version !== latest_version) {
+            const options = {
+                type: 'question',
+                buttons: [ 'Yes', 'No'],
+                defaultId: 0,
+                title: 'Question',
+                message: `Do you want to download now?`,
+                detail: `New version ${latest_version} found.`,
+            };
+            dialog.showMessageBox(null, options, (response) => {
+                if (response === 0) {
+                    var platform = process.platform === 'darwin' ? 0 : 1;
+                    var url = body.assets[platform].browser_download_url;
+                    var name = body.assets[platform].name;
+                    request({url: url}).on('error', function(err) {return;}).pipe(fs.createWriteStream(path.join(app.getPath('downloads'), name))).on('close', function() {
+                        const options = {
+                            type: 'question',
+                            buttons: [ 'Yes', 'No'],
+                            defaultId: 0,
+                            title: 'Question',
+                            message: `Download complete!\nClose and install update now?`,
+                        };
+                        dialog.showMessageBox(null, options, (response) => {
+                            if (response === 0) {
+                                open(path.join(app.getPath('downloads'), name));
+                                app.quit();
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    })
+}
 function open_file_dialog() {
     if (process.platform === 'darwin') {
         const window = win;
