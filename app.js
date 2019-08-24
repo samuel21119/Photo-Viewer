@@ -226,6 +226,7 @@ function view_photo(arr, cur, press) {
                 image(++page, arr, cur);
             break;
         case ESC:
+        case ENTER:
             choose_folder = true;
             if (!if_single)
                 folder(arr, cur);
