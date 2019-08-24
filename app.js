@@ -52,9 +52,7 @@ async function folder(arr, name) {
         document.getElementById('holder').innerText = arr[name];
     var p = path.join(folder_name, arr[name]);
     const result = await FindFiles(p, /^1\..*/);
-    var list = [path.join(p, result[0].file)];
-    console.log(list);
-    show_image(list);
+    show_image(path.join(p, result[0].file));
 }
 function image(cnt, arr, cur) {
     var title = path.basename(folder_name);
@@ -64,14 +62,12 @@ function image(cnt, arr, cur) {
     if (arr[cur] !== undefined)
         p = path.join(folder_name, arr[cur]);
     console.log(p,  arr2[0]);
-    p = path.join(p, arr2[cnt]);
     if (search)
         document.getElementById('input').value = text + `: ${title} ${arr2[cnt]}`;
     else
         document.getElementById('holder').innerText = title + `  ${arr2[cnt]}`;
 
-    var list = [p];
-    show_image(list);
+    show_image(path.join(p, arr2[cnt]));
 }
 document.getElementById('body').addEventListener('keyup', function(event) {
     var press = event.keyCode;
@@ -176,19 +172,17 @@ document.getElementById('body').addEventListener('keyup', function(event) {
     }
 });
 function show_image(src) {
-    var target = document.getElementById('img');
-    if (target !== null) {
-        console.log('Remove');
-        target.remove();
-    }
-    src.forEach(function(src) {
-        fs.readFile(src, function(err, data) {
-            var img = document.createElement('img');
-            img.src = 'data:image/png;base64, ' + data.toString('base64');
-            img.id = 'img';
-            
-            document.body.appendChild(img);
-        })
+    
+    fs.readFile(src, function(err, data) {
+        var img = document.createElement('img');
+        img.src = 'data:image/png;base64, ' + data.toString('base64');
+        img.id = 'img';
+        var target = document.getElementById('img');
+        if (target !== null) {
+            console.log('Remove');
+            target.remove();
+        }
+        document.body.appendChild(img);
     })
 }
 function toggle_hide() {
