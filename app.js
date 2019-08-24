@@ -28,13 +28,22 @@ function get_folder(name) {
     fs.readdir(name, (err, files) => {
         if (err)
             return;
+        files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
         document.getElementById('drop').style.display = 'none';
-        files.forEach(file => {
-            arr.push(file);
-            if (file.indexOf('jpg') !== -1 || file.indexOf('png') !== -1)
+        end = files.length;
+        files = files.map(function (fileName) {
+            if (fileName.indexOf('jpg') !== -1 || fileName.indexOf('png') !== -1)
                 photo_cnt++;
-            end++;
+            return {
+              name: fileName,
+              time: fs.statSync(name + '/' + fileName).mtime.getTime()
+            };
+        }).sort(function (a, b) {
+            return b.time - a.time;
+        }).map(function (v) {
+            return v.name;
         });
+        arr = files;
         if (photo_cnt > end / 2) {
             arr2 = arr;
             arr2.sort(cmp);
@@ -77,11 +86,12 @@ document.getElementById('body').addEventListener('keyup', function(event) {
             view_photo(find, cur2, press);
         }else if (find.length === 0 && press === ENTER) {
             text = document.getElementById('input').value;
+            var reg = new RegExp(text.toUpperCase());
             document.activeElement.blur();
             find = [];
             find_num = [];
             for (var start = 0; start < arr.length; start++) {
-                if (arr[start].indexOf(text) !== -1) {
+                if (arr[start].toUpperCase().match(reg)) {
                     find.push(arr[start]);
                     find_num.push(start);
                 }
@@ -111,13 +121,15 @@ document.getElementById('body').addEventListener('keyup', function(event) {
                     arr2 = [];
                     choose_folder = false;
                     fs.readdir(path.join(folder_name, find[cur2]), (err, files) => {
+                        files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
                         files.forEach(file => {
                             console.log(file);
                             arr2.push(file);
                         });
+                        arr2.sort(cmp);
+                        image(0, find, cur2);
                     });
                     page = 0;
-                    image(0, find, cur2);
                     return;
                 case ESC:
                     find = [];
@@ -147,6 +159,7 @@ document.getElementById('body').addEventListener('keyup', function(event) {
                 choose_folder = false;
                 arr2 = [];
                 fs.readdir(path.join(folder_name, arr[cur]), async (err, files) => {
+                    files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
                     files.forEach(file => {
                         // console.log(file);
                         arr2.push(file);

@@ -40,7 +40,15 @@
   text-align: center;
   color: white;
   font-size: 20px;
-  padding: 10px;
+  padding-bottom: 5px;
+}
+.holder {
+  background-color: rgba(64, 64, 64, 5);
+  font-family: 'Inconsolata', sans-serif;
+  text-align: center;
+  color: white;
+  font-size: 20px;
+  padding-bottom: 5px;
 }
 .drop {
   background-color: rgb(64, 64, 64);
