@@ -1,0 +1,38 @@
+{
+  "name": "photo_viewer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.photo_viewer.app",
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "category": "com.samuelhuang.app"
+    }
+  },
+  "author": "Samuel",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^6.0.3",
+    "electron-builder": "^21.2.0"
+  },
+  "dependencies": {
+    "file-regex": "^3.0.1",
+    "fs": "0.0.1-security",
+    "math": "0.0.3",
+    "path": "^0.12.7"
+  }
+}
