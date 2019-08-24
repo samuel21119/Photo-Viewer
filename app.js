@@ -12,6 +12,7 @@ const LEFT = 37,
 var arr = [], arr2 = [], find = [], find_num = [];
 var start, end, cur, cur2, page;
 var folder_name, choose_folder, search, if_single, text;
+var loaded = false;
 function init() {
     start = end = cur = 0;
     page = 0;
@@ -22,6 +23,9 @@ function init() {
 }
 init();
 function get_folder(name) {
+    if (name === '')
+        return;
+    loaded = true;
     init();
     folder_name = name;
     var photo_cnt = 0;
@@ -93,6 +97,8 @@ function image(cnt, arr, cur) {
 document.getElementById('body').addEventListener('keyup', function(event) {
     var press = event.keyCode;
     // console.log(event);
+    if (!loaded)
+        return;
     if (search) {
         if (!choose_folder) {
             view_photo(find, cur2, press);
@@ -197,16 +203,14 @@ document.getElementById('body').addEventListener('keyup', function(event) {
     }
 });
 function show_image(src) {
-    
     fs.readFile(src, function(err, data) {
         var img = document.createElement('img');
+        img.setAttribute('onmousedown', 'mouseDown(event);');
         img.src = 'data:image/png;base64, ' + data.toString('base64');
         img.id = 'img';
         var target = document.getElementById('img');
-        if (target !== null) {
-            console.log('Remove');
+        if (target !== null)
             target.remove();
-        }
         document.body.appendChild(img);
     })
 }
@@ -217,7 +221,7 @@ function toggle_hide() {
         o.style.display = 'block';
         i.style.display = 'none';
         search = false;
-    } else {
+    }else {
         document.getElementById('input').value = '';
         o.style.display = 'none';
         i.style.display = 'block';

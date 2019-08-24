@@ -45,6 +45,23 @@
             e.preventDefault();
             e.stopPropagation();
         });
+        function mouseDown(e) {
+            e = e || window.event;
+            switch (e.which) {
+                case 1: // Left
+                    var evt = new KeyboardEvent('keyup', {'keyCode': RIGHT, 'which': RIGHT});
+                    document.getElementById('body').dispatchEvent(evt);
+                    break;
+                case 2: // Middle
+                    var evt = new KeyboardEvent('keyup', {'keyCode': ENTER, 'which': ENTER});
+                    document.getElementById('body').dispatchEvent(evt);
+                    break;
+                case 3: //Right
+                    var evt = new KeyboardEvent('keyup', {'keyCode': LEFT, 'which': LEFT});
+                    document.getElementById('body').dispatchEvent(evt);
+                    break;
+            }
+        }
     </script>
     
 </body>
