@@ -10,7 +10,7 @@ const LEFT = 37,
       ESC = 27;
 
 var arr = [], arr2 = [], find = [], find_num = [];
-var start, end, cur, cur2, page;
+var start, end, cur, cur2, page, goto_tmp, goto_status;
 var folder_name, choose_folder, search, if_single, text;
 var loaded = false;
 function init() {
@@ -19,6 +19,8 @@ function init() {
     choose_folder = true;
     search = false;
     if_single = false;
+    goto_status = false;
+    goto_tmp = '';
     arr = [], arr2 = [];
 }
 init();
@@ -96,12 +98,11 @@ function image(cnt, arr, cur) {
 }
 document.getElementById('body').addEventListener('keyup', function(event) {
     var press = event.keyCode;
-    // console.log(event);
     if (!loaded)
         return;
     if (search) {
         if (!choose_folder) {
-            view_photo(find, cur2, press);
+            view_photo(find, cur2, press, event);
         }else if (find.length === 0 && press === ENTER) {
             text = document.getElementById('input').value;
             var reg = new RegExp(text.toUpperCase());
@@ -119,7 +120,7 @@ document.getElementById('body').addEventListener('keyup', function(event) {
                 folder(find, 0);
                 return;
             }
-            toggle_hide();
+            toggle_find();
             search = false;
         }else if (find.length !== 0) {
             switch(press) {
@@ -141,8 +142,7 @@ document.getElementById('body').addEventListener('keyup', function(event) {
                     fs.readdir(path.join(folder_name, find[cur2]), (err, files) => {
                         files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
                         files.forEach(file => {
-                            console.log(file);
-                            arr2.push(file);
+                             arr2.push(file);
                         });
                         arr2.sort(cmp);
                         image(0, find, cur2);
@@ -151,13 +151,13 @@ document.getElementById('body').addEventListener('keyup', function(event) {
                     return;
                 case ESC:
                     find = [];
-                    toggle_hide();
+                    toggle_find();
                     search = false;
                     folder(arr, cur = find_num[cur2]);
             }
         }else if (press === ESC) {
             search = false;
-            toggle_hide();
+            toggle_find();
         }
     }else if (choose_folder && !if_single) {
         switch(press) {
@@ -179,7 +179,6 @@ document.getElementById('body').addEventListener('keyup', function(event) {
                 fs.readdir(path.join(folder_name, arr[cur]), async (err, files) => {
                     files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
                     files.forEach(file => {
-                        // console.log(file);
                         arr2.push(file);
                     });
                     arr2.sort(cmp);
@@ -189,7 +188,7 @@ document.getElementById('body').addEventListener('keyup', function(event) {
                 return;
             case 70: // F(ind)
                 if ((event.metaKey || event.ctrlKey) && !if_single)
-                    toggle_hide();
+                    toggle_find();
                 break;
             case 82: // R(andom)
                 folder(arr, cur = getRandom(0, end - 1));
@@ -199,7 +198,7 @@ document.getElementById('body').addEventListener('keyup', function(event) {
                 folder(arr, cur);
         }
     }else {
-        view_photo(arr, cur, press);
+        view_photo(arr, cur, press, event);
     }
 });
 function show_image(src) {
@@ -214,22 +213,7 @@ function show_image(src) {
         document.body.appendChild(img);
     })
 }
-function toggle_hide() {
-    var o = document.getElementById('holder');
-    var i = document.getElementById('send');
-    if (o.style.display === 'none') {
-        o.style.display = 'block';
-        i.style.display = 'none';
-        search = false;
-    }else {
-        document.getElementById('input').value = '';
-        o.style.display = 'none';
-        i.style.display = 'block';
-        document.getElementById('input').focus();
-        search = true;
-    }
-}
-function view_photo(arr, cur, press) {
+function view_photo(arr, cur, press, event) {
     switch(press) {
         case LEFT:
         case UP:
@@ -241,11 +225,25 @@ function view_photo(arr, cur, press) {
             if (page < arr2.length - 1)
                 image(++page, arr, cur);
             break;
-        case ESC:
         case ENTER:
+            if (goto_status) {
+                var go = goto(false);
+                if (1 <= go && go <= arr2.length)
+                    image(page = go - 1, arr, cur);
+                break;
+            }
+        case ESC:
+            if (goto_status) {
+                goto(false);
+                break;
+            }
             choose_folder = true;
             if (!if_single)
                 folder(arr, cur);
+            break;
+        case 71: // G(oto)
+            if ((event.metaKey || event.ctrlKey) && !if_single && !goto_status)
+                goto(true);
             break;
     }
 }
@@ -253,6 +251,55 @@ function getRandom(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+function toggle_find() {
+    var o = document.getElementById('holder');
+    var i = document.getElementById('send');
+    var box = document.getElementById('input');
+    if (o.style.display === 'none') {
+        o.style.display = 'block';
+        i.style.display = 'none';
+        search = false;
+        box.placeholder = ''; 
+    }else {
+        box.value = '';
+        o.style.display = 'none';
+        i.style.display = 'block';
+        box.focus();
+        box.placeholder = 'Search title';
+        search = true;
+    }
+}
+function goto(start) {
+    var o = document.getElementById('holder');
+    var i = document.getElementById('send');
+    var box = document.getElementById('input');
+    if (start) {
+        if (search) {
+            goto_tmp = box.value;
+        }else {
+            o.style.display = 'none';
+            i.style.display = 'block';
+        }
+        goto_status = true;
+        box.value = '';
+        box.placeholder = 'Goto page';
+        box.focus();
+    }else {
+        box.placeholder = '';
+        var go = box.value;
+        if (goto_tmp !== '')
+            box.value = goto_tmp;
+        else {
+            o.style.display = 'block';
+            i.style.display = 'none';
+            box.value = '';
+        }
+        goto_tmp = '';
+        goto_status = false;
+        document.activeElement.blur();
+        return parseInt(go);
+    }
+}
 function shuffle(array) {
     for (var i = array.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));

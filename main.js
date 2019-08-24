@@ -136,7 +136,7 @@ function setMainMenu() {
             ]
         },
         {
-            label: 'Find',
+            label: 'Navigation',
             submenu: [
                 {
                     label: 'Find',
@@ -147,6 +147,16 @@ function setMainMenu() {
                         win.webContents.sendInputEvent({ type: 'keyDown', modifiers: mod, keyCode: 'F' });
                         // win.webContents.sendInputEvent({ type: 'char', mod, keyCode: 'F' });
                         win.webContents.sendInputEvent({ type: 'keyUp', modifiers: mod, keyCode: 'F'});
+                    }
+                },{
+                    label: 'Goto page',
+                    accelerator: 'CmdOrCtrl+G',
+                    click: () => {
+                        let mod = [];
+                        mod.push('meta');
+                        win.webContents.sendInputEvent({ type: 'keyDown', modifiers: mod, keyCode: 'G' });
+                        // win.webContents.sendInputEvent({ type: 'char', mod, keyCode: 'F' });
+                        win.webContents.sendInputEvent({ type: 'keyUp', modifiers: mod, keyCode: 'G'});
                     }
                 }
             ]
@@ -179,19 +189,6 @@ function setMainMenu() {
             ]
         }
     ]
-
-
-    const menu = Menu.getApplicationMenu();
-    const submenu = new Menu();
-    submenu.append(new MenuItem({
-        label: 'Open Folder',
-        accelerator: 'Cmd+O',
-        click: () => {open_file_dialog();}
-    }))
-    menu.insert(1, new MenuItem({
-        label: "File",
-        submenu: submenu
-    }));
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 ipc.on('open-file-dialog', function (event) {
