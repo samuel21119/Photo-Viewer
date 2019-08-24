@@ -25,6 +25,12 @@ function get_folder(name) {
     init();
     folder_name = name;
     var photo_cnt = 0;
+    fs.lstat(name, (err, stats) => {
+        if (stats.isFile()) {
+            show_image(name);
+            return;
+        }
+    })
     fs.readdir(name, (err, files) => {
         if (err)
             return;
@@ -44,7 +50,7 @@ function get_folder(name) {
             return v.name;
         });
         arr = files;
-        if (photo_cnt > end / 2) {
+        if (photo_cnt > 0) {
             arr2 = arr;
             arr2.sort(cmp);
             arr = [];

@@ -79,8 +79,8 @@ img {
   position: relative;
   height: auto; 
   width: auto; 
-  max-width: 90vh; 
-  max-height: 90vh;
+  max-width: 93vw; 
+  max-height: 93vh;
   z-index: 2;
 }
 

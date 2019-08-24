@@ -196,7 +196,7 @@ ipc.on('open-file-dialog', function (event) {
 function open_file_dialog() {
     if (process.platform === 'darwin') {
         const window = win;
-        dialog.showOpenDialog(window, { properties: [ 'openDirectory' ]}, function (folder) {
+        dialog.showOpenDialog(window, { properties: [ 'openDirectory', 'openFile' ]}, function (folder) {
             if (folder) 
                 win.webContents.send('selected-directory', folder);
         });
