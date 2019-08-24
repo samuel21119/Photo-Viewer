@@ -229,9 +229,10 @@ function CheckUpdate() {
                             title: 'Question',
                             message: `Download complete!\nClose and install update now?`,
                         };
-                        dialog.showMessageBox(null, options, (response) => {
+                        dialog.showMessageBox(null, options, async(response) => {
                             if (response === 0) {
                                 open(path.join(app.getPath('downloads'), name));
+                                await sleep(3000);
                                 app.quit();
                             }
                         });
@@ -255,7 +256,8 @@ function open_file_dialog() {
         })
 }
 
-
-
-
-
+function sleep(ms){
+    return new Promise(resolve => {
+        setTimeout(resolve, ms)
+    })
+}
