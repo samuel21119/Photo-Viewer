@@ -31,7 +31,7 @@ function get_folder(name) {
             return;
         }
     })
-    fs.readdir(name, (err, files) => {
+    fs.readdir(name, async (err, files) => {
         if (err)
             return;
         files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
@@ -49,15 +49,22 @@ function get_folder(name) {
         }).map(function (v) {
             return v.name;
         });
-        arr = files;
         if (photo_cnt > 0) {
-            arr2 = arr;
+            arr2 = [];
+            var i = 0;
+            for (i = 0; i < end; i++) {
+                var tmp = files[i];
+                var info = await fs.lstatSync(path.join(name, tmp));
+                if (info.isFile())
+                    arr2.push(tmp);
+            }
             arr2.sort(cmp);
-            arr = [];
             if_single = true;
             image(0, arr, 0);
-        }else
+        }else {
+            arr = files;
             folder(arr, 0);
+        }
     });
 }
 async function folder(arr, name) {
@@ -76,7 +83,6 @@ function image(cnt, arr, cur) {
     var p = folder_name;
     if (arr[cur] !== undefined)
         p = path.join(folder_name, arr[cur]);
-    console.log(p,  arr2[0]);
     if (search)
         document.getElementById('input').value = text + `: ${title} ${arr2[cnt]}`;
     else
