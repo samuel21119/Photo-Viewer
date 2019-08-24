@@ -15,13 +15,16 @@
         <input type="text" class="text_box" id="input">
     </div>
     <div class="drop" id="drop">
-        Drop folder here or <br>
-        click me to open folder</div>
+        <i class="material-icons" id="icon" style="font-size: 150px;">folder_open</i><br>
+        Drag and drop folder here or <br>
+        click me to open folder
+    </div>
     <script src="app.js"></script>
     <script>
         const ipc = require('electron').ipcRenderer;
         var drop = document.getElementById('drop');
         drop.style.cursor = 'pointer';
+        document.getElementById('icon').style.cursor = 'pointer';
         drop.onclick = function() {
             ipc.send('open-file-dialog');
         };

@@ -26,6 +26,9 @@ function get_folder(name) {
     folder_name = name;
     var photo_cnt = 0;
     fs.readdir(name, (err, files) => {
+        if (err)
+            return;
+        document.getElementById('drop').style.display = 'none';
         files.forEach(file => {
             arr.push(file);
             if (file.indexOf('jpg') !== -1 || file.indexOf('png') !== -1)
@@ -34,6 +37,7 @@ function get_folder(name) {
         });
         if (photo_cnt > end / 2) {
             arr2 = arr;
+            arr2.sort(cmp);
             arr = [];
             if_single = true;
             image(0, arr, 0);
@@ -48,23 +52,26 @@ async function folder(arr, name) {
         document.getElementById('holder').innerText = arr[name];
     var p = path.join(folder_name, arr[name]);
     const result = await FindFiles(p, /^1\..*/);
-    show_image(path.join(p, result[0].file));
+    var list = [path.join(p, result[0].file)];
+    console.log(list);
+    show_image(list);
 }
-async function image(cnt, arr, cur) {
+function image(cnt, arr, cur) {
     var title = path.basename(folder_name);
     if (arr[cur] !== undefined)
         title = arr[cur];
     var p = folder_name;
     if (arr[cur] !== undefined)
         p = path.join(folder_name, arr[cur]);
-    console.log(p);
-    const result = await FindFiles(p, new RegExp(`^${cnt+1}\\.`, ''));
-    console.log(path.join(p, result[0].file));
+    console.log(p,  arr2[0]);
+    p = path.join(p, arr2[cnt]);
     if (search)
-        document.getElementById('input').value = text + `: ${title} ${result[0].file}`;
+        document.getElementById('input').value = text + `: ${title} ${arr2[cnt]}`;
     else
-        document.getElementById('holder').innerText = title + `  ${result[0].file}`;
-    show_image(path.join(p, result[0].file));
+        document.getElementById('holder').innerText = title + `  ${arr2[cnt]}`;
+
+    var list = [p];
+    show_image(list);
 }
 document.getElementById('body').addEventListener('keyup', function(event) {
     var press = event.keyCode;
@@ -143,14 +150,15 @@ document.getElementById('body').addEventListener('keyup', function(event) {
             case ENTER:
                 choose_folder = false;
                 arr2 = [];
-                fs.readdir(path.join(folder_name, arr[cur]), (err, files) => {
+                fs.readdir(path.join(folder_name, arr[cur]), async (err, files) => {
                     files.forEach(file => {
-                        console.log(file);
+                        // console.log(file);
                         arr2.push(file);
                     });
+                    arr2.sort(cmp);
+                    image(0, arr, cur);
                 });
                 page = 0;
-                image(0, arr, cur);
                 return;
             case 70: // F(ind)
                 if ((event.metaKey || event.ctrlKey) && !if_single)
@@ -168,16 +176,19 @@ document.getElementById('body').addEventListener('keyup', function(event) {
     }
 });
 function show_image(src) {
-    fs.readFile(src, function(err, data) {
-        var img = document.createElement('img');
-        img.src = 'data:image/png;base64, ' + data.toString('base64');
-        img.id = 'img';
-        var target = document.getElementById('img');
-        if (target !== null) {
-            console.log('Remove');
-            target.remove();
-        }
-        document.body.appendChild(img);
+    var target = document.getElementById('img');
+    if (target !== null) {
+        console.log('Remove');
+        target.remove();
+    }
+    src.forEach(function(src) {
+        fs.readFile(src, function(err, data) {
+            var img = document.createElement('img');
+            img.src = 'data:image/png;base64, ' + data.toString('base64');
+            img.id = 'img';
+            
+            document.body.appendChild(img);
+        })
     })
 }
 function toggle_hide() {
@@ -223,4 +234,9 @@ function shuffle(array) {
         var j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
+}
+function cmp(a, b) {
+    a = a.replace(/\.[^/.]+$/, ""); a = parseInt(a);
+    b = b.replace(/\.[^/.]+$/, ""); b = parseInt(b);
+    return a < b ? -1 : 1;
 }
