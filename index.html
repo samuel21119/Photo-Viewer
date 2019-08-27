@@ -11,6 +11,7 @@
 
 <body id="body">
     <div class="holder" id="holder"></div>
+    <div class="fullscreen" id="fullscreen" style="width: 100%; height: 100%; position: absolute; z-index: 0"></div>
     <div class="input" id="send" style="display: none">
         <input type="text" class="text_box" id="input">
     </div>
@@ -32,10 +33,10 @@
             console.log(`You selected: ${path}`);
             get_folder(String(path));
         })
+
         document.addEventListener('drop', (e) => {
             e.preventDefault();
             e.stopPropagation();
-
             for (const f of e.dataTransfer.files) {
                 console.log('File(s) you dragged here: ', f.path);
                 get_folder(f.path);
@@ -44,8 +45,11 @@
         document.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            console.log(123);
         });
         function mouseDown(e) {
+            if (if_single_image)
+                return;
             e = e || window.event;
             switch (e.which) {
                 case 1: // Left

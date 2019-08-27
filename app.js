@@ -9,9 +9,10 @@ const LEFT = 37,
       ENTER = 13,
       ESC = 27;
 
+const image_type= ['jpg', 'jpeg', 'png', 'tiff', 'gif'];
 var arr = [], arr2 = [], find = [], find_num = [];
 var start, end, cur, cur2, page, goto_tmp, goto_status;
-var folder_name, choose_folder, search, if_single, text;
+var folder_name, choose_folder, search, if_single, if_single_image,text;
 var loaded = false;
 function init() {
     start = end = cur = 0;
@@ -20,6 +21,7 @@ function init() {
     search = false;
     if_single = false;
     goto_status = false;
+    if_single_image = false;
     goto_tmp = '';
     arr = [], arr2 = [];
 }
@@ -33,6 +35,8 @@ function get_folder(name) {
     var photo_cnt = 0;
     fs.lstat(name, (err, stats) => {
         if (stats.isFile()) {
+            if_single_image = true;
+            document.getElementById('holder').innerText = path.basename(name);
             show_image(name);
             return;
         }
@@ -44,7 +48,7 @@ function get_folder(name) {
         document.getElementById('drop').style.display = 'none';
         end = files.length;
         files = files.map(function (fileName) {
-            if (fileName.indexOf('jpg') !== -1 || fileName.indexOf('png') !== -1)
+            if (image_type.indexOf(path.extname(fileName).replace('.', '')) !== -1)
                 photo_cnt++;
             return {
               name: fileName,
