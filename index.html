@@ -17,15 +17,19 @@
     </div>
     <div class="drop" id="drop">
         <i class="material-icons" id="icon" style="font-size: 150px;">folder_open</i><br>
-        Drag and drop folder here or <br>
+        Drag folder to here or <br>
         click me to open folder
     </div>
     <script src="app.js"></script>
     <script>
         const ipc = require('electron').ipcRenderer;
         var drop = document.getElementById('drop');
+        var dragging = 0;
         drop.style.cursor = 'pointer';
         document.getElementById('icon').style.cursor = 'pointer';
+        function hide_border() {
+            document.getElementById('border').style.display = 'none';
+        }
         drop.onclick = function() {
             ipc.send('open-file-dialog');
         };
@@ -45,7 +49,6 @@
         document.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log(123);
         });
         function mouseDown(e) {
             if (if_single_image)

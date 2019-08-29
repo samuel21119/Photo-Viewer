@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const math = require('math');
+const Tiff = require('tiff.js');
 const FindFiles = require('./file-regex.js');
 const LEFT = 37,
       UP = 38,
@@ -9,7 +10,7 @@ const LEFT = 37,
       ENTER = 13,
       ESC = 27;
 
-const image_type= ['jpg', 'jpeg', 'png', 'tiff', 'gif'];
+const image_type= ['jpg', 'jpeg', 'png', 'tiff', 'tif', 'gif', 'cr2'];
 var arr = [], arr2 = [], find = [], find_num = [];
 var start, end, cur, cur2, page, goto_tmp, goto_status;
 var folder_name, choose_folder, search, if_single, if_single_image,text;
@@ -29,15 +30,16 @@ init();
 function get_folder(name) {
     if (name === '')
         return;
-    loaded = true;
     init();
     folder_name = name;
-    var photo_cnt = 0;
+    var photo_cnt = false;
     fs.lstat(name, (err, stats) => {
-        if (stats.isFile()) {
+        if (stats.isFile() && image_type.indexOf(path.extname(name).replace('.', '')) !== -1) {
             if_single_image = true;
             document.getElementById('holder').innerText = path.basename(name);
             show_image(name);
+            loaded = true;
+            document.getElementById('drop').style.display = 'none';
             return;
         }
     })
@@ -45,11 +47,10 @@ function get_folder(name) {
         if (err)
             return;
         files = files.filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
-        document.getElementById('drop').style.display = 'none';
         end = files.length;
         files = files.map(function (fileName) {
             if (image_type.indexOf(path.extname(fileName).replace('.', '')) !== -1)
-                photo_cnt++;
+                photo_cnt = true;
             return {
               name: fileName,
               time: fs.statSync(name + '/' + fileName).mtime.getTime()
@@ -59,21 +60,27 @@ function get_folder(name) {
         }).map(function (v) {
             return v.name;
         });
-        if (photo_cnt > 0) {
+        if (photo_cnt) {
             arr2 = [];
             var i = 0;
             for (i = 0; i < end; i++) {
                 var tmp = files[i];
                 var info = await fs.lstatSync(path.join(name, tmp));
-                if (info.isFile())
+                if (info.isFile() && image_type.indexOf(path.extname(tmp).replace('.', '')) !== -1)
                     arr2.push(tmp);
             }
             arr2.sort(cmp);
             if_single = true;
             image(0, arr, 0);
+            if (arr2.length > 0) {
+                loaded = true;
+                document.getElementById('drop').style.display = 'none';
+            }
         }else {
             arr = files;
             folder(arr, 0);
+            loaded = true;
+            document.getElementById('drop').style.display = 'none';
         }
     });
 }
@@ -205,17 +212,21 @@ document.getElementById('body').addEventListener('keyup', function(event) {
         view_photo(arr, cur, press, event);
     }
 });
-function show_image(src) {
-    fs.readFile(src, function(err, data) {
-        var img = document.createElement('img');
-        img.setAttribute('onmousedown', 'mouseDown(event);');
-        img.src = 'data:image/png;base64, ' + data.toString('base64');
-        img.id = 'img';
-        var target = document.getElementById('img');
-        if (target !== null)
-            target.remove();
-        document.body.appendChild(img);
-    })
+async function show_image(src) {
+    const data = await fs.readFileSync(src);
+    var img = document.createElement('img');
+    img.setAttribute('onmousedown', 'mouseDown(event);');
+     if (path.extname(src).replace('tiff', 'tif') === '.tif') {
+        var tiff = new Tiff({ buffer: data });
+        tiff = tiff.toCanvas();
+        img.src = tiff.toDataURL();
+     }else
+        img.src = await 'data:image/png;base64, ' + data.toString('base64');
+    img.id = 'img';
+    var target = document.getElementById('img');
+    if (target !== null)
+        target.remove();
+    document.body.appendChild(img);
 }
 function view_photo(arr, cur, press, event) {
     switch(press) {
