@@ -37,6 +37,7 @@
             console.log(`You selected: ${path}`);
             get_folder(String(path));
         })
+        ipc.send('finished-loading');
 
         document.addEventListener('drop', (e) => {
             e.preventDefault();

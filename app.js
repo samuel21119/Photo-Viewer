@@ -10,10 +10,10 @@ const LEFT = 37,
       ENTER = 13,
       ESC = 27;
 
-const image_type= ['jpg', 'jpeg', 'png', 'tiff', 'tif', 'gif', 'cr2'];
+const image_type= ['jpg', 'jpeg', 'png', 'tiff', 'tif', 'gif'];
 var arr = [], arr2 = [], find = [], find_num = [];
 var start, end, cur, cur2, page, goto_tmp, goto_status;
-var folder_name, choose_folder, search, if_single, if_single_image,text;
+var folder_name, choose_folder, search, if_single, if_single_image, text;
 var loaded = false;
 function init() {
     start = end = cur = 0;
@@ -28,12 +28,13 @@ function init() {
 }
 init();
 function get_folder(name) {
-    if (name === '')
+    if (name === '' || name === null)
         return;
     init();
     folder_name = name;
     var photo_cnt = false;
     fs.lstat(name, (err, stats) => {
+        if (err) return;
         if (stats.isFile() && image_type.indexOf(path.extname(name).replace('.', '')) !== -1) {
             if_single_image = true;
             document.getElementById('holder').innerText = path.basename(name);
@@ -101,9 +102,9 @@ function image(cnt, arr, cur) {
     if (arr[cur] !== undefined)
         p = path.join(folder_name, arr[cur]);
     if (search)
-        document.getElementById('input').value = text + `: ${title} ${arr2[cnt]}`;
+        document.getElementById('input').value = text + `: ${title} / ${arr2[cnt]}`;
     else
-        document.getElementById('holder').innerText = title + `  ${arr2[cnt]}`;
+        document.getElementById('holder').innerText = title + ` / ${arr2[cnt]}`;
 
     show_image(path.join(p, arr2[cnt]));
 }

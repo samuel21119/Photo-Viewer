@@ -58,7 +58,7 @@ function createWindow() {
     win.on('closed', () => {
         win = null;
     });
-
+    
     CheckUpdate();
 }
 function setMainMenu() {
@@ -240,6 +240,24 @@ function CheckUpdate() {
         }
     })
 }
+// // Windows open file with electron app
+// ipc.on('finished-loading', function(event) {
+//     var data = null;
+//     if (process.platform === 'win32' && argv.length >= 2) {
+//         var openFilePath = process.argv[1];
+//         data = openFilePath;
+//     }
+//     win.webContents.send('selected-directory', data);
+// });
+// // Mac
+// app.on('will-finish-launching', () => {
+//     app.on('open-file', async(event, path) => {
+//         if (path === undefined)
+//             return;
+//         await sleep(1000);
+//         win.webContents.send('selected-directory', path);
+//     });
+// });
 function open_file_dialog() {
     if (process.platform === 'darwin') {
         const window = win;
