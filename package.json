@@ -30,6 +30,7 @@
     "electron-builder": "^21.2.0"
   },
   "dependencies": {
+    "compare-versions": "^3.5.1",
     "file-regex": "^3.0.1",
     "fs": "0.0.1-security",
     "math": "0.0.3",

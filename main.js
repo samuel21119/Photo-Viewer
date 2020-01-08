@@ -12,6 +12,7 @@ const open = require('open');
 const request = require('request');
 const pkg = require('./package.json');
 const ipc = require('electron').ipcMain
+const compareVersions = require('compare-versions');
 UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0';
 
 
@@ -208,7 +209,7 @@ function CheckUpdate() {
         current_version = pkg.version;
         latest_version = body.name;
         console.log(latest_version , current_version);
-        if (current_version !== latest_version) {
+        if (compareVersions(current_version, latest_version) === -1) {
             const options = {
                 type: 'question',
                 buttons: [ 'Yes', 'No'],
@@ -263,7 +264,7 @@ app.on('will-finish-launching', () => {
 });
 function open_file_dialog() {
     if (process.platform === 'darwin') {
-        const window = win;
+        const window = BrowserWindow.getFocusedWindow();
         dialog.showOpenDialog(window, { properties: [ 'openDirectory', 'openFile' ]}, function (folder) {
             if (folder) 
                 win.webContents.send('selected-directory', folder);
