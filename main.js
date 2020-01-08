@@ -263,16 +263,16 @@ app.on('will-finish-launching', () => {
     });
 });
 function open_file_dialog() {
+    const window = BrowserWindow.getFocusedWindow();
     if (process.platform === 'darwin') {
-        const window = BrowserWindow.getFocusedWindow();
         dialog.showOpenDialog(window, { properties: [ 'openDirectory', 'openFile' ]}, function (folder) {
             if (folder) 
-                win.webContents.send('selected-directory', folder);
+                window.webContents.send('selected-directory', folder);
         });
     }else
         dialog.showOpenDialog({properties: [ 'openDirectory', 'openFile' ]}, function (folder) {
             if (folder)
-                win.webContents.send('selected-directory', folder);
+                window.webContents.send('selected-directory', folder);
         })
 }
 
