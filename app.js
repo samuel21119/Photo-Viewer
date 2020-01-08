@@ -92,7 +92,17 @@ async function folder(arr, name) {
         document.getElementById('holder').innerText = arr[name];
     var p = path.join(folder_name, arr[name]);
     const result = await FindFiles(p, /^1\..*/);
-    show_image(path.join(p, result[0].file));
+    if (result.length === 0) {
+        fs.readdir(p, async (err, files) => {
+            for (var i = 0; i < files.length; i++)
+                if (files[i][0] !== '.' && image_type.indexOf(path.extname(files[i]).replace('.', '')) !== -1) {
+                    console.log(files[i])
+                    show_image(path.join(p, files[i]));
+                    break;
+                }
+        })
+    }else 
+        show_image(path.join(p, result[0].file));
 }
 function image(cnt, arr, cur) {
     var title = path.basename(folder_name);

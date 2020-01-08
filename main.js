@@ -87,9 +87,12 @@ function setMainMenu() {
             {
                 label: 'Open Folder...',
                 accelerator: 'CmdOrCtrl+O',
-                click: () => {open_file_dialog();}
-            },
-            isMac ? { role: 'close' } : { role: 'quit' }
+                click: open_file_dialog
+            },{
+                label: 'New Window',
+                accelerator: 'CmdOrCtrl+N',
+                click: createWindow
+            },{ role: 'close' }
         ]
     },
     // { role: 'editMenu' }
@@ -266,7 +269,7 @@ function open_file_dialog() {
                 win.webContents.send('selected-directory', folder);
         });
     }else
-        dialog.showOpenDialog({properties: ['openDirectory']}, function (folder) {
+        dialog.showOpenDialog({properties: [ 'openDirectory', 'openFile' ]}, function (folder) {
             if (folder)
                 win.webContents.send('selected-directory', folder);
         })
